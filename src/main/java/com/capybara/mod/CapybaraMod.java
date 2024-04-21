@@ -1,18 +1,20 @@
 package com.capybara.mod;
 
+import com.capybara.mod.commands.HackersCommand;
 import com.capybara.mod.hax.Base;
 import com.capybara.mod.hax.NoSlow;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.World;
+import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.ArrayList;
 
@@ -23,25 +25,53 @@ public class CapybaraMod {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event){
         MinecraftForge.EVENT_BUS.register(this);
-        this.hacks = new ArrayList<>();
+        this.hacks = new ArrayList<Base>();
         this.hacks.add(new NoSlow());
+
+        ClientCommandHandler.instance.registerCommand(new HackersCommand());
     }
 
     private boolean worldLoaded = false;
     private World world = null;
 
     @SubscribeEvent
-    public void worldLoaded(WorldEvent.Load event){
-        if(event.world.getWorldInfo().getWorldName().equals("New World")) {
-            this.world = event.world;
-            this.worldLoaded = true;
-            hacks.forEach(hack -> { hack.worldLoaded(event.world); });
+    public void joinWorld(EntityJoinWorldEvent event){
+        if(event.entity != null && Minecraft.getMinecraft().thePlayer != null){
+            if(event.entity == Minecraft.getMinecraft().thePlayer) {
+                FMLLog.info("ENTITY JOINED WORLD: " + event.entity);
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("[[[ YOU JOINED THE WORLD ]]]"));
+                this.world = event.world;
+                this.worldLoaded = true;
+                hacks.forEach(hack -> {
+                    hack.worldLoaded(event.world);
+                });
+            }
         }
     }
+
+    /*
+    @SubscribeEvent
+    public void worldLoaded(WorldEvent.Load event){
+        if(event.world != null) {
+            WorldInfo worldInfo = event.world.getWorldInfo();
+            if(worldInfo != null) {
+                FMLLog.info("LOADING WORLD: " + event.world.getWorldInfo().getGameType());
+                if (event.world.getWorldInfo().getWorldName().equals("New World")) {
+                    this.world = event.world;
+                    this.worldLoaded = true;
+                    hacks.forEach(hack -> {
+                        hack.worldLoaded(event.world);
+                    });
+                }
+            }
+        }
+    }
+     */
 
     private Entity cow;
     private int ticks;
 
+    /*
     @SubscribeEvent
     public void onTick(TickEvent.PlayerTickEvent event){
         EntityPlayer player = event.player;
@@ -76,6 +106,7 @@ public class CapybaraMod {
             }
         }
     }
+    */
 
     @SubscribeEvent
     public void livingHurtEvent(LivingHurtEvent event){

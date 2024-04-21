@@ -30,7 +30,7 @@ public class NoSlow extends Base {
 
     @SubscribeEvent
     public void tickEvent(TickEvent.PlayerTickEvent event) {
-        if(event.phase == TickEvent.Phase.END) return;
+        if(event.phase == TickEvent.Phase.END || this.world == null) return;
         World world = event.player.worldObj;
         List<EntityPlayer> players = world.playerEntities;
         for(EntityPlayer player : players){
@@ -108,7 +108,7 @@ public class NoSlow extends Base {
 
         public void updateSpeed(EntityPlayer p){
             this.speed = Math.sqrt(Math.pow(p.posX - p.prevPosX, 2) + Math.pow(p.posZ - p.prevPosZ, 2));
-            FMLLog.info("Player "+ this.player +" SPEED "+ this.speed);
+            //FMLLog.info("Player "+ this.player +" SPEED "+ this.speed);
         }
 
         public double percent_cheating(){
